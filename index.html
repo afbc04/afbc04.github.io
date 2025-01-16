@@ -1,1 +1,70 @@
-Hello World
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cliente</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    #messages {
+      margin-bottom: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+    #input {
+      display: flex;
+      gap: 10px;
+    }
+    input[type="text"] {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <h1>Cliente</h1>
+  <div id="messages"></div>
+  <div id="input">
+    <input type="text" id="message" placeholder="Digite sua mensagem">
+    <button onclick="sendMessage()">Enviar</button>
+  </div>
+
+  <script>
+    const messagesDiv = document.getElementById('messages');
+    const input = document.getElementById('message');
+    const serverUrl = 'ws://<SEU_IP_DO_SERVIDOR>:8080'; // URL do servidor Java
+
+    const socket = new WebSocket(serverUrl);
+
+    socket.onopen = () => {
+      messagesDiv.innerHTML += '<p><strong>Conectado ao servidor.</strong></p>';
+    };
+
+    socket.onmessage = (event) => {
+      messagesDiv.innerHTML += `<p><strong>Servidor:</strong> ${event.data}</p>`;
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    };
+
+    socket.onerror = (error) => {
+      messagesDiv.innerHTML += `<p style="color: red;">Erro: ${error.message}</p>`;
+    };
+
+    socket.onclose = () => {
+      messagesDiv.innerHTML += '<p><strong>Conexão encerrada.</strong></p>';
+    };
+
+    function sendMessage() {
+      const message = input.value.trim();
+      if (message) {
+        socket.send(message);
+        messagesDiv.innerHTML += `<p><strong>Você:</strong> ${message}</p>`;
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        input.value = '';
+      }
+    }
+  </script>
+</body>
+</html>
